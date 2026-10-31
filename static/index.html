@@ -108,6 +108,13 @@
               <button id="exportCsvBtn" class="export-btn" title="Download supporting table as CSV">📥 Export CSV</button>
             </div>
             <h3 id="answerText"></h3>
+            <div id="sqlContainer" class="sql-container" style="display:none;">
+              <div class="sql-header">
+                <span class="sql-label">EXECUTED SQL QUERY</span>
+                <button id="copySqlBtn" class="copy-sql-btn" title="Copy SQL Query">📋 Copy SQL</button>
+              </div>
+              <pre class="sql-code"><code id="sqlCode"></code></pre>
+            </div>
             <div id="supportingData"></div>
           </div>
         </article>

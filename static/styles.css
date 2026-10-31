@@ -66,7 +66,13 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-s
 .method-tag{font-size:9px;color:#74839a;background:#edf1f7;padding:4px 7px;border-radius:10px}
 .export-btn{border:1px solid #c8d7f2;background:#fff;color:#3562c5;padding:5px 9px;border-radius:6px;font:600 10px 'DM Sans';cursor:pointer;transition:all .15s ease}
 .export-btn:hover{background:#edf3ff;border-color:#9cb7ee}
-.result h3{font:600 14px/1.6 Manrope,sans-serif;margin:12px 0;color:#233650}
+.result h3{font:600 14px/1.6 Manrope,sans-serif;margin:12px 0 8px;color:#233650}
+.sql-container{margin:12px 0 14px;background:#0f1d32;border:1px solid #1f3454;border-radius:8px;padding:11px 13px;box-shadow:inset 0 1px 4px #00000020}
+.sql-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.sql-label{font-size:9px;letter-spacing:1.1px;font-weight:700;color:#6fa5fc}
+.copy-sql-btn{background:#1b2d49;color:#9bc0fc;border:1px solid #2e4a73;padding:3px 7px;border-radius:4px;font:600 9.5px 'DM Sans';cursor:pointer;transition:all .15s ease}
+.copy-sql-btn:hover{background:#264067;color:#fff}
+.sql-code{margin:0;overflow-x:auto;font:11.5px/1.5 'SF Mono','Fira Code','Courier New',monospace;color:#a5d4ff;white-space:pre-wrap;word-break:break-word}
 .data-table{border-collapse:collapse;width:100%;font-size:11px;margin-top:12px}
 .data-table th,.data-table td{text-align:left;padding:8px;border-bottom:1px solid #e5ebf5}
 .data-table th{color:#7c8ba1;font-weight:600;font-size:10px;letter-spacing:.5px}

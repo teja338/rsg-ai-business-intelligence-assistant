@@ -107,6 +107,16 @@ function showResult(result) {
   document.getElementById('answerText').textContent = result.answer;
   const tag = document.getElementById('methodTag');
   tag.textContent = result.interpretation_method === 'llm' ? '🤖 AI Interpreted' : '⚡ Deterministic Rules';
+
+  const sqlContainer = document.getElementById('sqlContainer');
+  const sqlCode = document.getElementById('sqlCode');
+  if (result.sql) {
+    sqlContainer.style.display = 'block';
+    sqlCode.textContent = result.sql;
+  } else {
+    sqlContainer.style.display = 'none';
+  }
+
   renderData(result.data);
   box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -271,6 +281,16 @@ document.querySelectorAll('.chart-tab').forEach(tab => {
 });
 
 document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
+
+document.getElementById('copySqlBtn').addEventListener('click', () => {
+  const sql = document.getElementById('sqlCode').textContent;
+  if (sql) {
+    navigator.clipboard.writeText(sql);
+    const btn = document.getElementById('copySqlBtn');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = '📋 Copy SQL'; }, 2000);
+  }
+});
 
 document.getElementById('excludedCard').addEventListener('click', () => {
   const q = 'Why were records excluded?';

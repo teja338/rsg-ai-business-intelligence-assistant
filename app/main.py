@@ -90,6 +90,7 @@ def ask(payload: AskRequest):
             "supported": True,
             "intent": intent,
             "answer": result["answer"],
+            "sql": result.get("sql"),
             "data": result["data"],
             "interpretation_method": parsed.get("method"),
             "calculation": "Deterministic, read-only SQLite query"
