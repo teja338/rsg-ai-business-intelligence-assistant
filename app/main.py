@@ -86,6 +86,14 @@ def ask(payload: AskRequest):
                 "data": None,
                 "interpretation_method": parsed.get("method")
             }
+        if result.get("sql"):
+            print(f"\n=======================================================")
+            print(f"[AI BI Assistant] Question: {payload.question}")
+            print(f"[AI BI Assistant] Intent:   {intent} ({parsed.get('method')})")
+            print(f"[AI BI Assistant] Executed SQL Query:")
+            print(f"  {result['sql']}")
+            print(f"=======================================================\n")
+
         return {
             "supported": True,
             "intent": intent,
