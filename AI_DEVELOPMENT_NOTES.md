@@ -31,16 +31,22 @@ This document fulfills Deliverable 5 of the technical assessment, documenting th
    - Added support for the assessment's verbatim question: *"How did revenue change between two months?"*.
 
 4. **Automated Testing & Security Guardrails:**
-   - Generated a 15-test automated test suite covering:
+   - Generated a **24-test automated test suite** covering:
      - Data ingestion and data quality counters (51 total, 48 eligible, 3 excluded).
      - All 5 assessment questions with verified mathematical accuracy.
      - Phrasing variations and synonyms (e.g., "Show revenue by month").
+     - Extended analytics: Channel breakdown, Category breakdown, Product breakdown, Region breakdown, Filtered revenue (e.g. "North region sales").
+     - Data quality audit log query ("Why were records excluded?").
      - SQL injection attempts (e.g., `DROP TABLE sales_transactions; --`).
      - Query safety validation functions (`validate_sql_query`).
-     - REST API health check and data reload endpoints.
+     - Multi-part CSV file upload (`POST /api/upload`) and reload endpoints.
 
-5. **Frontend Dashboard:**
-   - Crafted a clean, responsive single-page application using modern HTML5, CSS custom properties, and Chart.js for data visualization.
+5. **Frontend Dashboard & UX:**
+   - Crafted a clean, responsive single-page application using modern HTML5, CSS custom properties, and Chart.js.
+   - Added interactive chart tabs (Monthly Trend, Categories, Sales Channels, Regions).
+   - Added one-click CSV export for any generated supporting table data.
+   - Added drag-and-drop / file upload modal for custom CSV ingestion.
+   - Clickable "Excluded records" card to immediately view the data audit log.
 
 ---
 

@@ -5,7 +5,11 @@ import urllib.error
 from datetime import datetime
 from .config import LLM_API_KEY, LLM_BASE_URL, LLM_MODEL
 
-SUPPORTED = {"total_revenue", "top_product", "monthly_trend", "top_region", "compare_months"}
+SUPPORTED = {
+    "total_revenue", "top_product", "monthly_trend", "top_region", "compare_months",
+    "channel_breakdown", "category_breakdown", "product_breakdown", "region_breakdown",
+    "filtered_revenue", "audit_log"
+}
 
 # Supports full names and common 3-letter abbreviations
 MONTHS = {
@@ -28,6 +32,10 @@ DISALLOWED_SQL_KEYWORDS = {
     "ATTACH", "DETACH", "REPLACE", "CREATE", "GRANT", "REVOKE", "EXEC", "EXECUTE"
 }
 
+KNOWN_REGIONS = ("north", "south", "east", "west")
+KNOWN_CATEGORIES = ("accessories", "electronics", "furniture")
+KNOWN_CHANNELS = ("online", "retail")
+
 def validate_sql_query(sql: str) -> tuple[bool, str]:
     """
     Validates a SQL query for read-only safety (guardrail against destructive SQL).
@@ -49,25 +57,19 @@ def validate_sql_query(sql: str) -> tuple[bool, str]:
 
 def _month_from_text(text: str) -> list[str]:
     found = []
-    # Match month names/abbreviations
     for name, number in MONTHS.items():
-        # Avoid false positive on English modal verb "may" followed by common verbs
         if name == "may" and re.search(r"\bmay\s+(be|have|generate|cause|include|occur|show)\b", text, re.I):
             continue
         for match in re.finditer(rf"\b{name}\b", text, re.I):
-            # Check adjacent 12 chars for explicit 4-digit year
             year_match = re.search(r"\b20\d{2}\b", text[match.end():match.end()+12])
             if not year_match:
-                # Also check before the month name (e.g. 2026 January)
                 year_match = re.search(r"\b20\d{2}\b", text[max(0, match.start()-12):match.start()])
             year = year_match.group(0) if year_match else "2026"
             found.append((match.start(), f"{year}-{number:02d}"))
 
-    # Match numeric formats like 2026-01 or 2026/01
     numeric = re.findall(r"\b(20\d{2})[-/](0?[1-9]|1[0-2])\b", text)
     found.extend((text.find(f"{y}-{m}"), f"{y}-{int(m):02d}") for y, m in numeric)
     
-    # Sort in order of appearance and deduplicate preserving order
     sorted_months = [m for _, m in sorted(found)]
     deduped = []
     for m in sorted_months:
@@ -92,10 +94,13 @@ def deterministic_interpret(question: str) -> dict | None:
     if re.search(r"\b(drop|delete|update|insert|alter|truncate|create|grant|revoke|attach|exec)\b", q, re.I) or ";" in q or "--" in q:
         return None
 
+    # 1. Audit log intent (data quality inspection)
+    if _matches_phrase_or_word(q, ("excluded rows", "excluded records", "excluded transactions", "invalid records", "invalid rows", "audit log", "data quality", "why were records excluded", "rejected rows")):
+        return {"intent": "audit_log", "method": "rules"}
+
     months = _month_from_text(q)
 
-    # 1. Compare months intent
-    # Handles: "How did revenue change between two months?", "Compare January and February 2026", "change between Jan and Feb"
+    # 2. Compare months intent
     is_comparison = _matches_phrase_or_word(q, ("compare", "change", "difference", "between", "versus", "vs"))
     has_month_word = _matches_phrase_or_word(q, ("month", "months"))
     if is_comparison and (len(months) >= 2 or has_month_word):
@@ -103,23 +108,48 @@ def deterministic_interpret(question: str) -> dict | None:
         month_b = months[1] if len(months) >= 2 else "2026-02"
         return {"intent": "compare_months", "month_a": month_a, "month_b": month_b, "method": "rules"}
 
-    # 2. Monthly trend intent
-    # Handles: "What is the monthly revenue trend?", "revenue by month", "monthly sales", "trend over months", "month-by-month"
+    # 3. Monthly trend intent
     if _matches_phrase_or_word(q, ("monthly", "month-wise", "month wise", "trend", "each month", "by month", "per month", "month by month", "over months")):
         return {"intent": "monthly_trend", "method": "rules"}
 
-    # 3. Top region intent
-    # Handles: "Which region generated the highest sales?", "best region by revenue", "top region"
-    if _matches_phrase_or_word(q, ("region", "state", "territory", "zone", "area")) and _matches_phrase_or_word(q, ("highest", "top", "best", "most", "sales", "revenue", "max")):
+    # 4. Channel breakdown & comparison intent
+    if _matches_phrase_or_word(q, ("channel", "sales channel", "online vs retail", "retail vs online", "online or retail")):
+        return {"intent": "channel_breakdown", "method": "rules"}
+
+    # 5. Category breakdown intent
+    if _matches_phrase_or_word(q, ("category breakdown", "sales by category", "revenue by category", "breakdown by category", "which category", "top category", "best category")):
+        return {"intent": "category_breakdown", "method": "rules"}
+
+    # 6. Product breakdown (all products)
+    if _matches_phrase_or_word(q, ("all products", "product breakdown", "sales by product", "revenue by product", "breakdown by product", "every product", "products breakdown")):
+        return {"intent": "product_breakdown", "method": "rules"}
+
+    # 7. Region breakdown (all regions)
+    if _matches_phrase_or_word(q, ("all regions", "regional breakdown", "region breakdown", "sales by region", "revenue by region", "breakdown by region", "every region")):
+        return {"intent": "region_breakdown", "method": "rules"}
+
+    # 8. Top region intent (highest only)
+    if _matches_phrase_or_word(q, ("region", "state", "territory", "zone", "area")) and _matches_phrase_or_word(q, ("highest", "top", "best", "most", "max", "leading", "leader")):
         return {"intent": "top_region", "method": "rules"}
 
-    # 4. Top product intent
-    # Handles: "Which product generated the highest revenue?", "best selling product", "top item"
-    if _matches_phrase_or_word(q, ("product", "item")) and _matches_phrase_or_word(q, ("highest", "top", "best", "most", "generated", "revenue", "sales", "max")):
+    # 9. Top product intent (highest only)
+    if _matches_phrase_or_word(q, ("product", "item")) and _matches_phrase_or_word(q, ("highest", "top", "best", "most", "max", "leading", "leader", "best selling", "top selling")):
         return {"intent": "top_product", "method": "rules"}
 
-    # 5. Total revenue intent
-    # Handles: "What is the total revenue?", "overall revenue", "gross revenue", "net revenue", "total sales", "overall sales", "sum of revenue", "total turnover", "revenue", "sales"
+    # 10. Filtered revenue (specific region, category, or channel)
+    is_revenue_query = _matches_phrase_or_word(q, ("revenue", "sales", "how much", "total", "turnover", "performance"))
+    if is_revenue_query:
+        for reg in KNOWN_REGIONS:
+            if re.search(rf"\b{reg}\b", q):
+                return {"intent": "filtered_revenue", "dimension": "region", "value": reg.title(), "method": "rules"}
+        for cat in KNOWN_CATEGORIES:
+            if re.search(rf"\b{cat}\b", q):
+                return {"intent": "filtered_revenue", "dimension": "category", "value": cat.title(), "method": "rules"}
+        for ch in KNOWN_CHANNELS:
+            if re.search(rf"\b{ch}\b", q):
+                return {"intent": "filtered_revenue", "dimension": "sales_channel", "value": ch.title(), "method": "rules"}
+
+    # 11. Total revenue intent
     if _matches_phrase_or_word(q, ("total revenue", "overall revenue", "gross revenue", "net revenue", "total sales", "overall sales", "sum of revenue", "total turnover", "revenue", "sales")):
         return {"intent": "total_revenue", "method": "rules"}
 
@@ -128,12 +158,13 @@ def deterministic_interpret(question: str) -> dict | None:
 def _llm_interpret(question: str) -> dict | None:
     if not LLM_API_KEY:
         return None
-    prompt = ("Classify the business question into exactly one supported intent. Return JSON only with keys "
-              "intent, month_a, month_b. Allowed intents: total_revenue, top_product, monthly_trend, top_region, "
-              "compare_months, unsupported. Months must be YYYY-MM. Never generate SQL. If comparing months, extract "
-              "two months. Question: " + question)
+    allowed = ", ".join(sorted(SUPPORTED)) + ", unsupported"
+    prompt = (f"Classify the business question into exactly one supported intent: {allowed}. "
+              "Return JSON only with keys: intent, month_a, month_b, dimension, value. "
+              "Allowed dimensions: region, category, sales_channel. Months must be YYYY-MM. "
+              "Never generate SQL. Question: " + question)
     payload = {"model": LLM_MODEL, "temperature": 0, "messages": [
-        {"role": "system", "content": "You are a strict intent classifier. Output one JSON object and no markdown."},
+        {"role": "system", "content": "You are a strict intent classifier for business intelligence. Output one JSON object and no markdown."},
         {"role": "user", "content": prompt}
     ]}
     request = urllib.request.Request(
@@ -160,10 +191,12 @@ def _llm_interpret(question: str) -> dict | None:
                 if not isinstance(value, str) or not re.fullmatch(r"20\d{2}-(0[1-9]|1[0-2])", value):
                     return None
                 parsed[key] = value
+        if intent == "filtered_revenue":
+            parsed["dimension"] = result.get("dimension")
+            parsed["value"] = result.get("value")
         return parsed
     except (urllib.error.URLError, TimeoutError, KeyError, ValueError, TypeError, json.JSONDecodeError):
         return None
 
 def interpret_question(question: str) -> dict:
-    # Prefer AI classification when configured; deterministic rules are the safe fallback.
     return _llm_interpret(question) or deterministic_interpret(question) or {"intent": "unsupported", "method": "rules"}

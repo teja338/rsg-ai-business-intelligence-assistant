@@ -34,6 +34,9 @@ flowchart TD
         Dispatcher -->|monthly_trend| Q3[(SQLite: GROUP BY month ORDER BY month)]
         Dispatcher -->|top_region| Q4[(SQLite: GROUP BY region ORDER BY revenue DESC)]
         Dispatcher -->|compare_months| Q5[(SQLite: Parameterized Monthly Comparison)]
+        Dispatcher -->|channel/category| Q6[(SQLite: Multi-Dimensional Breakdowns)]
+        Dispatcher -->|filtered_revenue| Q7[(SQLite: Filtered Territorial/Category Sales)]
+        Dispatcher -->|audit_log| Q8[(SQLite: Audit Log Excluded Records)]
     end
 
     subgraph Data Store & Auditing

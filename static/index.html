@@ -1,7 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>RSG | AI Business Intelligence</title>
   <link rel="stylesheet" href="/static/styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -9,31 +10,157 @@
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <div class="brand"><div class="brand-mark">RSG</div><div><strong>Research Private Limited</strong><span>Business Intelligence</span></div></div>
-      <div class="side-label">WORKSPACE</div><a class="nav active" href="#dashboard">▦ <span>Overview</span></a><a class="nav" href="#assistant">✳ <span>AI Assistant</span></a>
-      <div class="sidebar-note"><span class="pulse"></span><div><b>Data connection active</b><small>SQLite · Sales transactions</small></div></div>
-      <div class="side-foot">RSG · GET Technical Challenge<br><span>Mini AI BI Assistant v1.0</span></div>
+      <div class="brand">
+        <div class="brand-mark">RSG</div>
+        <div><strong>Research Private Limited</strong><span>Business Intelligence</span></div>
+      </div>
+      <div class="side-label">WORKSPACE</div>
+      <a class="nav active" href="#dashboard">▦ <span>Overview</span></a>
+      <a class="nav" href="#assistant">✳ <span>AI Assistant</span></a>
+      <a class="nav" href="#chartPanel">📊 <span>Visualizations</span></a>
+      <a class="nav" href="#dataQuality">🛡️ <span>Data Quality</span></a>
+      
+      <div class="sidebar-note">
+        <span class="pulse"></span>
+        <div><b>Data connection active</b><small>SQLite · Sales transactions</small></div>
+      </div>
+      <div class="side-foot">
+        RSG · GET Technical Challenge<br>
+        <span>Mini AI BI Assistant v1.1</span>
+      </div>
     </aside>
+
     <main class="main-content" id="dashboard">
-      <header class="topbar"><div><div class="eyebrow">SALES INTELLIGENCE / OVERVIEW</div><h1>Business overview</h1><p>Ask questions in plain English. Get answers grounded in your sales data.</p></div><div class="top-right"><span class="live"><i></i> LIVE DATA</span><div class="avatar">BI</div></div></header>
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">SALES INTELLIGENCE / OVERVIEW</div>
+          <h1>Business Overview & Analytics</h1>
+          <p>Ask natural language business questions grounded in verified database queries.</p>
+        </div>
+        <div class="top-right">
+          <span class="live"><i></i> LIVE DATA</span>
+          <div class="avatar">BI</div>
+        </div>
+      </header>
+
       <section class="metrics" id="metrics">
-        <article class="metric-card"><div class="metric-top"><span>Total transactions</span><span class="metric-icon">▤</span></div><strong id="totalRows">—</strong><small>Rows loaded from CSV</small></article>
-        <article class="metric-card"><div class="metric-top"><span>Eligible transactions</span><span class="metric-icon green">✓</span></div><strong id="eligibleRows">—</strong><small>Completed, valid records</small></article>
-        <article class="metric-card"><div class="metric-top"><span>Excluded records</span><span class="metric-icon amber">!</span></div><strong id="excludedRows">—</strong><small>Retained with validation notes</small></article>
+        <article class="metric-card" title="Total raw records loaded from the sales CSV">
+          <div class="metric-top"><span>Total transactions</span><span class="metric-icon">▤</span></div>
+          <strong id="totalRows">—</strong>
+          <small>Rows loaded from CSV</small>
+        </article>
+        <article class="metric-card" title="Valid, completed transactions contributing to sales revenue">
+          <div class="metric-top"><span>Eligible transactions</span><span class="metric-icon green">✓</span></div>
+          <strong id="eligibleRows">—</strong>
+          <small>Completed, valid records</small>
+        </article>
+        <article class="metric-card clickable-card" id="excludedCard" title="Click to view audit log of excluded transactions">
+          <div class="metric-top"><span>Excluded records</span><span class="metric-icon amber">!</span></div>
+          <strong id="excludedRows">—</strong>
+          <small>Click to inspect audit log ↗</small>
+        </article>
       </section>
+
       <section class="content-grid">
         <article class="panel assistant-panel" id="assistant">
-          <div class="panel-heading"><div><div class="eyebrow">ASK YOUR DATA</div><h2>AI Business Assistant</h2><p>Ask a question about your sales performance.</p></div><div class="ai-symbol">✳</div></div>
-          <div class="suggestions-label">TRY ASKING</div>
-          <div class="suggestions"><button class="suggestion" data-q="What is the total revenue?">Total revenue <span>↗</span></button><button class="suggestion" data-q="Which product generated the highest revenue?">Top product <span>↗</span></button><button class="suggestion" data-q="Show monthly revenue trend">Monthly trend <span>↗</span></button><button class="suggestion" data-q="Which region generated the highest sales?">Top region <span>↗</span></button><button class="suggestion" data-q="How did revenue change between January and February 2026?">Compare months <span>↗</span></button></div>
-          <form id="askForm" class="ask-form"><label for="question">YOUR QUESTION</label><div class="input-wrap"><input id="question" type="text" minlength="3" maxlength="500" placeholder="e.g. Which product generated the highest revenue?" required><button id="askButton" type="submit">Ask assistant <span>→</span></button></div><div class="form-hint">Answers are calculated from validated SQLite records, not invented by the AI.</div></form>
-          <div id="result" class="result hidden" aria-live="polite"><div class="result-top"><span class="result-tag">ANALYSIS RESULT</span><span id="methodTag" class="method-tag"></span></div><h3 id="answerText"></h3><div id="supportingData"></div></div>
+          <div class="panel-heading">
+            <div>
+              <div class="eyebrow">ASK YOUR DATA</div>
+              <h2>AI Business Assistant</h2>
+              <p>Type a question in plain English or select a suggestion below.</p>
+            </div>
+            <div class="ai-symbol">✳</div>
+          </div>
+
+          <div class="suggestions-label">CORE CHALLENGE QUESTIONS</div>
+          <div class="suggestions">
+            <button class="suggestion" data-q="What is the total revenue?">Total revenue <span>↗</span></button>
+            <button class="suggestion" data-q="Which product generated the highest revenue?">Top product <span>↗</span></button>
+            <button class="suggestion" data-q="What is the monthly revenue trend?">Monthly trend <span>↗</span></button>
+            <button class="suggestion" data-q="Which region generated the highest sales?">Top region <span>↗</span></button>
+            <button class="suggestion" data-q="How did revenue change between January and February 2026?">Compare months <span>↗</span></button>
+          </div>
+
+          <div class="suggestions-label" style="margin-top:14px;">EXTENDED ANALYTICS & DRILL-DOWNS</div>
+          <div class="suggestions">
+            <button class="suggestion" data-q="Which sales channel generated the highest revenue?">Channel breakdown <span>↗</span></button>
+            <button class="suggestion" data-q="What is the revenue breakdown by category?">Category breakdown <span>↗</span></button>
+            <button class="suggestion" data-q="What is the revenue in North region?">North region sales <span>↗</span></button>
+            <button class="suggestion" data-q="Show sales by all regions">All regions <span>↗</span></button>
+            <button class="suggestion" data-q="Why were records excluded?">Audit excluded records <span>↗</span></button>
+          </div>
+
+          <form id="askForm" class="ask-form">
+            <label for="question">YOUR QUESTION</label>
+            <div class="input-wrap">
+              <input id="question" type="text" minlength="3" maxlength="500" placeholder="e.g. Which product generated the highest revenue?" required>
+              <button id="askButton" type="submit">Ask assistant <span>→</span></button>
+            </div>
+            <div class="form-hint">Grounded execution: Questions map to allowlisted, parameterized SQLite queries with zero hallucination.</div>
+          </form>
+
+          <div id="result" class="result hidden" aria-live="polite">
+            <div class="result-top">
+              <div class="result-tags">
+                <span class="result-tag">ANALYSIS RESULT</span>
+                <span id="methodTag" class="method-tag"></span>
+              </div>
+              <button id="exportCsvBtn" class="export-btn" title="Download supporting table as CSV">📥 Export CSV</button>
+            </div>
+            <h3 id="answerText"></h3>
+            <div id="supportingData"></div>
+          </div>
         </article>
-        <article class="panel chart-panel"><div class="panel-heading"><div><div class="eyebrow">PERFORMANCE</div><h2>Monthly revenue</h2><p>Net revenue by order month</p></div><span class="chart-unit">₹ INR</span></div><div class="chart-wrap"><canvas id="revenueChart"></canvas></div><div class="chart-foot"><span><i class="legend-dot"></i> Net revenue</span><span>Jan – Jun 2026</span></div></article>
+
+        <article class="panel chart-panel" id="chartPanel">
+          <div class="panel-heading">
+            <div>
+              <div class="eyebrow">VISUAL ANALYTICS</div>
+              <h2 id="chartTitle">Monthly Revenue Trend</h2>
+              <p id="chartSubtitle">Net revenue by order month</p>
+            </div>
+            <span class="chart-unit">₹ INR</span>
+          </div>
+
+          <div class="chart-tabs">
+            <button class="chart-tab active" data-view="monthly">Monthly Trend</button>
+            <button class="chart-tab" data-view="categories">Categories</button>
+            <button class="chart-tab" data-view="channels">Sales Channels</button>
+            <button class="chart-tab" data-view="regions">Regions</button>
+          </div>
+
+          <div class="chart-wrap">
+            <canvas id="revenueChart"></canvas>
+          </div>
+          <div class="chart-foot" id="chartFoot">
+            <span><i class="legend-dot"></i> Net Revenue</span>
+            <span id="chartRange">Jan – Jun 2026</span>
+          </div>
+        </article>
       </section>
-      <section class="panel bottom-panel"><div class="bottom-copy"><div class="eyebrow">DATA QUALITY</div><h2>Transparent by design</h2><p>All source rows are retained. Invalid or non-completed transactions are excluded from revenue calculations and carry a validation note.</p></div><button class="reload-btn" id="reloadButton">↻ Reload source CSV</button><div id="reloadStatus" class="reload-status"></div></section>
-      <footer>RSG Mini AI Business Intelligence Assistant <span>Built for the Graduate Engineer Trainee assessment</span></footer>
+
+      <section class="panel bottom-panel" id="dataQuality">
+        <div class="bottom-copy">
+          <div class="eyebrow">DATA MANAGEMENT & AUDIT</div>
+          <h2>Data Quality & Import Controls</h2>
+          <p>
+            All source rows are preserved for full data lineage. Invalid, zero-quantity, missing-price, or returned transactions carry an auditable validation note and are safely excluded from revenue sums.
+          </p>
+        </div>
+        <div class="data-actions">
+          <input type="file" id="csvFileInput" accept=".csv" style="display:none">
+          <button class="reload-btn upload-btn" id="uploadButton">📤 Upload Custom CSV</button>
+          <button class="reload-btn" id="reloadButton">↻ Reload Source CSV</button>
+        </div>
+        <div id="reloadStatus" class="reload-status"></div>
+      </section>
+
+      <footer>
+        <div>RSG Mini AI Business Intelligence Assistant · <strong>GET Technical Challenge</strong></div>
+        <span>FastAPI + SQLite + Vectorless RAG + Chart.js</span>
+      </footer>
     </main>
   </div>
   <script src="/static/app.js"></script>
-</body></html>
+</body>
+</html>
