@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RSG | AI Business Intelligence</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">RSG</div><div><strong>Research Private Limited</strong><span>Business Intelligence</span></div></div>
+      <div class="side-label">WORKSPACE</div><a class="nav active" href="#dashboard">▦ <span>Overview</span></a><a class="nav" href="#assistant">✳ <span>AI Assistant</span></a>
+      <div class="sidebar-note"><span class="pulse"></span><div><b>Data connection active</b><small>SQLite · Sales transactions</small></div></div>
+      <div class="side-foot">RSG · GET Technical Challenge<br><span>Mini AI BI Assistant v1.0</span></div>
+    </aside>
+    <main class="main-content" id="dashboard">
+      <header class="topbar"><div><div class="eyebrow">SALES INTELLIGENCE / OVERVIEW</div><h1>Business overview</h1><p>Ask questions in plain English. Get answers grounded in your sales data.</p></div><div class="top-right"><span class="live"><i></i> LIVE DATA</span><div class="avatar">BI</div></div></header>
+      <section class="metrics" id="metrics">
+        <article class="metric-card"><div class="metric-top"><span>Total transactions</span><span class="metric-icon">▤</span></div><strong id="totalRows">—</strong><small>Rows loaded from CSV</small></article>
+        <article class="metric-card"><div class="metric-top"><span>Eligible transactions</span><span class="metric-icon green">✓</span></div><strong id="eligibleRows">—</strong><small>Completed, valid records</small></article>
+        <article class="metric-card"><div class="metric-top"><span>Excluded records</span><span class="metric-icon amber">!</span></div><strong id="excludedRows">—</strong><small>Retained with validation notes</small></article>
+      </section>
+      <section class="content-grid">
+        <article class="panel assistant-panel" id="assistant">
+          <div class="panel-heading"><div><div class="eyebrow">ASK YOUR DATA</div><h2>AI Business Assistant</h2><p>Ask a question about your sales performance.</p></div><div class="ai-symbol">✳</div></div>
+          <div class="suggestions-label">TRY ASKING</div>
+          <div class="suggestions"><button class="suggestion" data-q="What is the total revenue?">Total revenue <span>↗</span></button><button class="suggestion" data-q="Which product generated the highest revenue?">Top product <span>↗</span></button><button class="suggestion" data-q="Show monthly revenue trend">Monthly trend <span>↗</span></button><button class="suggestion" data-q="Which region generated the highest sales?">Top region <span>↗</span></button><button class="suggestion" data-q="How did revenue change between January and February 2026?">Compare months <span>↗</span></button></div>
+          <form id="askForm" class="ask-form"><label for="question">YOUR QUESTION</label><div class="input-wrap"><input id="question" type="text" minlength="3" maxlength="500" placeholder="e.g. Which product generated the highest revenue?" required><button id="askButton" type="submit">Ask assistant <span>→</span></button></div><div class="form-hint">Answers are calculated from validated SQLite records, not invented by the AI.</div></form>
+          <div id="result" class="result hidden" aria-live="polite"><div class="result-top"><span class="result-tag">ANALYSIS RESULT</span><span id="methodTag" class="method-tag"></span></div><h3 id="answerText"></h3><div id="supportingData"></div></div>
+        </article>
+        <article class="panel chart-panel"><div class="panel-heading"><div><div class="eyebrow">PERFORMANCE</div><h2>Monthly revenue</h2><p>Net revenue by order month</p></div><span class="chart-unit">₹ INR</span></div><div class="chart-wrap"><canvas id="revenueChart"></canvas></div><div class="chart-foot"><span><i class="legend-dot"></i> Net revenue</span><span>Jan – Jun 2026</span></div></article>
+      </section>
+      <section class="panel bottom-panel"><div class="bottom-copy"><div class="eyebrow">DATA QUALITY</div><h2>Transparent by design</h2><p>All source rows are retained. Invalid or non-completed transactions are excluded from revenue calculations and carry a validation note.</p></div><button class="reload-btn" id="reloadButton">↻ Reload source CSV</button><div id="reloadStatus" class="reload-status"></div></section>
+      <footer>RSG Mini AI Business Intelligence Assistant <span>Built for the Graduate Engineer Trainee assessment</span></footer>
+    </main>
+  </div>
+  <script src="/static/app.js"></script>
+</body></html>
