@@ -9,52 +9,92 @@ Built with **FastAPI + SQLite + HTML5 / CSS3 / JavaScript (Chart.js)**.
 ## Deliverables Index
 
 1. **Source Code & Git Repository:** Initialized and tracked locally on branch `main`.
-2. **Setup and Execution Instructions:** See [Section 1 & 2](#1-setup) below.
+2. **Setup and Execution Instructions:** See Sections 1 and 2.
 3. **Architecture Diagram & Technical Design:** See [`docs/architecture.md`](docs/architecture.md).
-4. **Automated Test Suite:** 24 test cases in [`tests/test_assistant.py`](tests/test_assistant.py) (run with `pytest -v`).
-5. **AI Development Notes:** See [`AI_DEVELOPMENT_NOTES.md`](AI_DEVELOPMENT_NOTES.md) (and [Section 10](#10-ai-assisted-development-disclosure)).
-6. **Technical Interview Preparation Guide:** See [`docs/interview_preparation_guide.md`](docs/interview_preparation_guide.md) (covering Agentic AI, GenAI, Vectorless RAG, LangChain, Google ADK, and Dify).
+4. **Automated Test Suite:** 24 test cases in [`tests/test_assistant.py`](tests/test_assistant.py).
+5. **AI Development Notes:** See [`AI_DEVELOPMENT_NOTES.md`](AI_DEVELOPMENT_NOTES.md).
+6. **Technical Interview Preparation Guide:** See [`docs/interview_preparation_guide.md`](docs/interview_preparation_guide.md).
 
 ---
 
 ## Key Features
 
-- **Transparent Data Ingestion & Audit:** Imports all 51 rows from `data/sales_data.csv`. Does not silently drop invalid rows; stores them with `is_eligible = 0` and explicit `validation_note` (48 eligible, 3 excluded).
-- **Supports All 5 Core Assessment Questions:**
-  1. *What is the total revenue?* $\rightarrow$ ₹1,439,200.00 across 48 transactions.
-  2. *Which product generated the highest revenue?* $\rightarrow$ Monitor (₹473,000.00).
-  3. *What is the monthly revenue trend?* $\rightarrow$ Monthly aggregation for Jan–Jun 2026.
-  4. *Which region generated the highest sales?* $\rightarrow$ South (₹411,200.00).
-  5. *How did revenue change between two months?* $\rightarrow$ Supports verbatim question, specific months, and 3-letter abbreviations.
-- **Extended Business Intelligence & Drill-Downs:**
-  - *Sales Channel Breakdown:* Online (₹746,750) vs. Retail (₹692,450).
-  - *Product Category Performance:* Accessories (₹533.1k) vs. Electronics (₹473k) vs. Furniture (₹433.1k).
-  - *Regional Breakdown:* Complete territorial comparison across South, North, East, and West.
-  - *Filtered Revenue:* Drill-downs by specific region (e.g. *"What is the revenue in North region?"*), category, or channel.
-  - *Data Quality Audit:* *"Why were records excluded?"* displays the exact excluded transactions with validation notes.
-- **Interactive UI & Visual Analytics:**
-  - Dynamic Chart Tabs: Switch between Monthly Trend, Categories, Sales Channels, and Regional charts.
-  - One-Click CSV Export: Export active supporting figures directly to a downloaded `.csv` file.
-  - Custom CSV Upload: Drag-and-drop or upload custom sales CSV files with automatic validation.
-  - Clickable Audit Card: Click on "Excluded records" to immediately inspect rejected transactions.
-- **Vectorless RAG / Intent-Based Execution:** Uses LLM or rule-based fallback strictly for intent classification and parameter extraction. Executes allowlisted, parameterized SQL; never runs arbitrary or model-generated SQL.
-- **SQL Injection & Guardrails:** Defense-in-depth with AST-style SQL query validation (`validate_sql_query`) and upfront keyword blocklist.
+### 1. Transparent Data Ingestion and Audit
+
+- Imports all 51 rows from `data/sales_data.csv`.
+- Preserves invalid records instead of silently deleting them.
+- Uses `is_eligible` and `validation_note` to track data quality.
+- 48 eligible transactions and 3 excluded transactions.
+
+### 2. Supports All Five Core Assessment Questions
+
+1. **What is the total revenue?**  
+   Result: ₹14,39,200.00 across 48 eligible transactions.
+
+2. **Which product generated the highest revenue?**  
+   Result: Monitor – ₹4,73,000.00.
+
+3. **What is the monthly revenue trend?**  
+   Result: Monthly revenue aggregation from January to June 2026.
+
+4. **Which region generated the highest sales?**  
+   Result: South – ₹4,11,200.00.
+
+5. **How did revenue change between two months?**  
+   Supports the original assessment question, specific month names, and three-letter month abbreviations.
+
+### 3. Extended Business Intelligence
+
+- **Sales Channel Breakdown:** Online (₹7,46,750) vs. Retail (₹6,92,450).
+- **Product Category Performance:** Accessories (₹5,33,100), Electronics (₹4,73,000), Furniture (₹4,33,100).
+- **Regional Breakdown:** Comparison across South, North, East, and West.
+- **Filtered Revenue:** Filter sales by region, category, or channel.
+- **Data Quality Audit:** Inspect excluded transactions and their validation notes.
+
+### 4. Interactive Dashboard
+
+- Interactive charts for monthly trends, categories, sales channels, and regions.
+- One-click CSV export of supporting figures.
+- CSV upload with validation and database reload.
+- Clickable excluded-records card for audit inspection.
+- Structured answers with supporting figures and SQL information.
+
+### 5. AI-Assisted Interpretation
+
+- Uses an LLM or deterministic rule-based fallback to interpret natural-language questions.
+- Extracts analytical intent and relevant parameters.
+- Executes predefined, parameterized SQL queries.
+- Does not execute arbitrary LLM-generated SQL.
+
+### 6. SQL Security and Guardrails
+
+- Predefined analytical SQL queries.
+- Parameterized inputs for user-provided values.
+- Lexical SQL validation and DDL/DML keyword blocking.
+- Unsupported questions are rejected rather than executed as arbitrary queries.
 
 ---
 
 ## 1. Setup
 
-Python 3.10+ is required.
+**Requirements:** Python 3.10 or later.
+
+Clone the repository or navigate to the project directory:
 
 ```bash
-# Clone or navigate to the repository directory
 cd rsg_ai_bi_assistant
+```
 
-# Create and activate a virtual environment
+Create and activate a virtual environment:
+
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
+```
 
-# Install dependencies
+Install dependencies:
+
+```bash
 pip install -r requirements.txt
 ```
 
@@ -62,76 +102,102 @@ pip install -r requirements.txt
 
 ## 2. Running the Application
 
-Start the FastAPI application with Uvicorn:
+Start the FastAPI application:
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-- **Web Dashboard:** Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
-- **Interactive OpenAPI / Swagger Docs:** Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+Open the following URLs:
 
-> The SQLite database is created automatically at `data/sales.db` on initial startup. To re-import the CSV at any time, click **Reload source CSV** in the UI or call `POST /api/reload`.
+- **Web Dashboard:** http://127.0.0.1:8000
+- **Interactive API Documentation:** http://127.0.0.1:8000/docs
+
+The SQLite database is created automatically at `data/sales.db` during initial startup.
+
+To re-import the source CSV:
+
+- Click **Reload source CSV** in the dashboard.
+- Alternatively, call `POST /api/reload`.
 
 ---
 
 ## 3. Optional LLM Integration
 
-The application operates seamlessly **out of the box without any external API key** using its robust deterministic rule-based interpreter.
+The application works without an external API key using its deterministic rule-based interpreter.
 
-To enable optional LLM-assisted zero-shot classification (Groq, OpenAI, or local Ollama), configure environment variables:
+To enable LLM-assisted natural-language classification, configure the environment variables.
+
+### Using Groq API
+
+Create a `.env` file in the project root:
+
+```env
+LLM_API_KEY=your_groq_api_key
+LLM_BASE_URL=https://api.groq.com/openai/v1
+LLM_MODEL=openai/gpt-oss-120b
+```
+
+The `.env` file should never be committed to GitHub.
+
+Start the application:
 
 ```bash
-# Using Groq / OpenAI:
-export LLM_API_KEY="your-api-key"
-export LLM_BASE_URL="https://api.groq.com/openai/v1"
-export LLM_MODEL="llama-3.3-70b-versatile"
-
-# Or using local Ollama:
-# export LLM_API_KEY="ollama"
-# export LLM_BASE_URL="http://localhost:11434/v1"
-# export LLM_MODEL="codegemma:2b"
-
 uvicorn app.main:app --reload
 ```
 
+### Optional Local Ollama Integration
+
+If supported by your configuration, local Ollama can be used:
+
+```env
+LLM_API_KEY=ollama
+LLM_BASE_URL=http://localhost:11434/v1
+LLM_MODEL=codegemma:2b
+```
+
+The application can fall back to deterministic interpretation when LLM configuration is unavailable.
+
 ---
 
-## 4. Supported Questions & Phrasings
+## 4. Supported Questions and Analytics
 
-| Analysis Type | Example Question | Deterministic SQLite Query |
-| :--- | :--- | :--- |
-| **Total revenue** | *"What is the total revenue?"*, *"Total sales"* | `SELECT SUM(revenue), COUNT(*) ... WHERE is_eligible=1` |
-| **Top product** | *"Which product generated the highest revenue?"* | `SELECT product, SUM(revenue) ... GROUP BY product ORDER BY revenue DESC LIMIT 1` |
-| **Monthly trend** | *"What is the monthly revenue trend?"*, *"Revenue by month"* | `SELECT strftime('%Y-%m', order_date), SUM(revenue) ... GROUP BY month` |
-| **Top region** | *"Which region generated the highest sales?"* | `SELECT region, SUM(revenue) ... GROUP BY region ORDER BY revenue DESC LIMIT 1` |
-| **Month comparison** | *"How did revenue change between two months?"* | Parameterized comparison between two ISO months with $\Delta$ and % change |
-| **Channel breakdown** | *"Which sales channel generated the highest revenue?"* | `SELECT sales_channel, SUM(revenue), SUM(quantity) ... GROUP BY sales_channel` |
-| **Category breakdown**| *"What is the revenue breakdown by category?"* | `SELECT category, SUM(revenue), SUM(quantity) ... GROUP BY category` |
-| **Regional breakdown**| *"Show sales by all regions"* | `SELECT region, SUM(revenue), COUNT(*) ... GROUP BY region` |
-| **Filtered revenue**  | *"What is the revenue in North region?"* | `SELECT SUM(revenue) ... WHERE is_eligible=1 AND LOWER(region)=LOWER(?)` |
-| **Data Quality Audit**| *"Why were records excluded?"* | `SELECT transaction_id, validation_note ... WHERE is_eligible=0` |
+| Analysis Type | Example Question | Execution Method |
+|---|---|---|
+| Total Revenue | What is the total revenue? | SQLite SUM aggregation |
+| Top Product | Which product generated the highest revenue? | GROUP BY and ORDER BY |
+| Monthly Trend | What is the monthly revenue trend? | Date-based aggregation |
+| Top Region | Which region generated the highest sales? | Regional aggregation |
+| Month Comparison | How did revenue change between two months? | Parameterized month comparison |
+| Channel Breakdown | Which sales channel generated the highest revenue? | Channel aggregation |
+| Category Breakdown | What is the revenue breakdown by category? | Category aggregation |
+| Regional Breakdown | Show sales by all regions | Regional aggregation |
+| Filtered Revenue | What is the revenue in North region? | Parameterized filtering |
+| Data Quality Audit | Why were records excluded? | Audit query |
 
 ---
 
 ## 5. API Reference
 
-### `POST /api/ask`
-Accepts a natural language question and returns a structured response.
+### POST `/api/ask`
+
+Accepts a natural-language question and returns a structured response.
 
 **Request:**
+
 ```json
 {
   "question": "Which sales channel generated the highest revenue?"
 }
 ```
 
-**Response (200 OK):**
+**Example response:**
+
 ```json
 {
   "supported": true,
   "intent": "channel_breakdown",
-  "answer": "Online is the leading sales channel with ₹746,750.00 in revenue (353 units across 28 transactions).",
+  "answer": "Online is the leading sales channel with ₹746750.00 in revenue.",
   "data": [
     {
       "sales_channel": "Online",
@@ -151,96 +217,129 @@ Accepts a natural language question and returns a structured response.
 }
 ```
 
-### Dedicated Endpoints
-- `GET /api/summary`: Returns `{ total_rows: 51, eligible_rows: 48, excluded_rows: 3 }`.
-- `GET /api/channels`: Returns sales channel distribution (Online vs. Retail).
-- `GET /api/categories`: Returns category performance (Accessories, Electronics, Furniture).
-- `GET /api/audit`: Returns the full audit log of excluded records.
-- `POST /api/upload`: Multi-part CSV file upload with validation and instant reload.
-- `GET /api/health`: Health status check (`{ "status": "ok" }`).
-- `POST /api/reload`: Re-reads `sales_data.csv` and re-seeds SQLite.
+### Other API Endpoints
+
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/api/summary` | GET | Returns transaction summary |
+| `/api/channels` | GET | Returns sales channel distribution |
+| `/api/categories` | GET | Returns category performance |
+| `/api/audit` | GET | Returns excluded-record audit log |
+| `/api/upload` | POST | Uploads and validates a CSV |
+| `/api/health` | GET | Checks application health |
+| `/api/reload` | POST | Reloads the source CSV into SQLite |
 
 ---
 
-## 6. Data Quality & Business Rules
+## 6. Data Quality and Business Rules
 
-All 51 rows from `data/sales_data.csv` are preserved in the SQLite table `sales_transactions` for complete data lineage.
+All 51 records from `data/sales_data.csv` are preserved in the SQLite table `sales_transactions`.
 
-**Eligibility Policy (`is_eligible = 1`):**
-1. Transaction status must be `Completed`.
-2. Quantity must be greater than zero.
-3. Unit price must be present and non-negative.
-4. Discount amount must be non-negative and $\le (\text{quantity} \times \text{unit\_price})$.
+### Eligibility Policy
 
-**Excluded Transactions (3 rows):**
-- `TXN0033`: Excluded because status is `Returned`.
-- `TXN0034`: Excluded because quantity is `0`.
-- `TXN0051`: Excluded because `Unit_price` is missing.
+A transaction is eligible when:
 
-Net Revenue Formula:
-$$\text{Net Revenue} = (\text{Quantity} \times \text{Unit Price}) - \text{Discount Amount}$$
+1. Transaction status is `Completed`.
+2. Quantity is greater than zero.
+3. Unit price is present and non-negative.
+4. Discount amount is non-negative and does not exceed the gross transaction amount.
+
+### Excluded Transactions
+
+| Transaction ID | Reason |
+|---|---|
+| TXN0033 | Returned transaction |
+| TXN0034 | Zero quantity |
+| TXN0051 | Missing unit price |
+
+### Revenue Formula
+
+Net Revenue = (Quantity × Unit Price) − Discount Amount
+
+Only eligible transactions are included in business revenue calculations.
 
 ---
 
-## 7. Automated Tests
+## 7. Automated Testing
 
-The test suite includes **24 automated tests** covering core questions, verbatim phrasing, abbreviations, invalid questions, SQL injection attempts, query safety guardrails, channel/category drill-downs, dedicated endpoints, and CSV file uploads.
+The project contains 24 automated tests covering:
 
-Run tests from the project root:
+- CSV import and data validation.
+- Total revenue calculation.
+- Highest-revenue product.
+- Monthly revenue trends.
+- Regional analytics.
+- Month comparison and abbreviations.
+- Unsupported and invalid questions.
+- SQL injection attempts and validation.
+- Channel and category breakdowns.
+- Product and regional breakdowns.
+- Filtered revenue.
+- Audit functionality.
+- API health, reload, and upload endpoints.
+
+Run the test suite:
 
 ```bash
 pytest -v
 ```
 
-Output:
-```text
-tests/test_assistant.py::test_csv_import_preserves_all_rows_and_excludes_three PASSED
-tests/test_assistant.py::test_total_revenue_returns_structured_result PASSED
-tests/test_assistant.py::test_top_product_question PASSED
-tests/test_assistant.py::test_monthly_trend_returns_months PASSED
-tests/test_assistant.py::test_monthly_trend_synonyms PASSED
-tests/test_assistant.py::test_region_question PASSED
-tests/test_assistant.py::test_month_comparison_specific_months PASSED
-tests/test_assistant.py::test_verbatim_question_five_between_two_months PASSED
-tests/test_assistant.py::test_month_abbreviations_comparison PASSED
-tests/test_assistant.py::test_unsupported_question_does_not_execute_sql PASSED
-tests/test_assistant.py::test_short_question_is_rejected PASSED
-tests/test_assistant.py::test_sql_injection_attempt_is_treated_as_unsupported PASSED
-tests/test_assistant.py::test_validate_sql_query_guardrails PASSED
-tests/test_assistant.py::test_channel_breakdown_question PASSED
-tests/test_assistant.py::test_category_breakdown_question PASSED
-tests/test_assistant.py::test_product_breakdown_question PASSED
-tests/test_assistant.py::test_region_breakdown_question PASSED
-tests/test_assistant.py::test_filtered_revenue_north_region PASSED
-tests/test_assistant.py::test_audit_log_question PASSED
-tests/test_assistant.py::test_health_check_endpoint PASSED
-tests/test_assistant.py::test_api_reload_endpoint PASSED
-tests/test_assistant.py::test_api_channels_and_categories_endpoints PASSED
-tests/test_assistant.py::test_upload_csv_endpoint PASSED
-tests/test_assistant.py::test_upload_invalid_csv_rejected PASSED
+**Verified result:**
 
-======================== 24 passed in 2.67s =========================
+```text
+24 passed
 ```
+
+One non-blocking deprecation warning was observed during testing.
 
 ---
 
-## 8. Architecture & Interview Resources
+## 8. Architecture and Interview Resources
 
-- Detailed Architecture Document: [`docs/architecture.md`](docs/architecture.md)
-- Complete AI Development Notes: [`AI_DEVELOPMENT_NOTES.md`](AI_DEVELOPMENT_NOTES.md)
-- Technical Interview Preparation Guide: [`docs/interview_preparation_guide.md`](docs/interview_preparation_guide.md)
+- **Architecture Document:** [`docs/architecture.md`](docs/architecture.md)
+- **AI Development Notes:** [`AI_DEVELOPMENT_NOTES.md`](AI_DEVELOPMENT_NOTES.md)
+- **Technical Interview Preparation:** [`docs/interview_preparation_guide.md`](docs/interview_preparation_guide.md)
 
 ---
 
 ## 9. AI-Assisted Development Disclosure
 
-- **AI tools used:** Antigravity (Google DeepMind agentic coding assistant with Gemini 3.8 Flash/Pro), Claude 3.7 Sonnet / Cursor, and local Ollama (`codegemma:2b`).
-- **How AI was used:** Architectural trade-off analysis (Vectorless RAG vs Text-to-SQL), ETL cleansing logic formulation, regex month extractor authoring, edge case test generation, and Chart.js UI integration.
-- **Problems encountered:** 
-  1. Verbatim Question 5 (*"How did revenue change between two months?"*) fell through to `total_revenue` because no specific month names were in the prompt.
-  2. SQL injection string `DROP TABLE sales_transactions; --` contained the substring `sales`, causing naive keyword matching to classify it as a revenue question.
-  3. Running `pytest -q` failed with `ModuleNotFoundError` without `pytest.ini`.
-  4. Short month abbreviations (*Jan*, *Feb*) were initially unrecognized.
-  5. Distinguishing ranking queries (*"Top region"*) from filtered queries (*"Revenue in North region"*).
-- **Debugging:** Added fallback for month comparisons without explicit months; hardened keyword matching with regex word boundaries `\b` and an upfront DDL blocklist; configured `pytest.ini` with `pythonpath = .`; expanded month dictionary with abbreviations; separated ranking adjectives from dimensional nouns.
-- **What I would improve with another day:** Conversational multi-turn memory, dynamic multi-dimensional slice-and-dice queries, drag-and-drop CSV upload with LLM schema mapping, and interactive visual drill-down.
+AI-assisted development tools were used for architecture analysis, implementation guidance, debugging, test generation, and documentation.
+
+The development process included:
+
+- Natural-language intent classification.
+- ETL and CSV validation logic.
+- Regex-based month extraction.
+- Edge-case test generation.
+- Chart.js dashboard integration.
+- Debugging API connectivity and question-classification issues.
+
+Detailed information about tools, encountered problems, debugging approaches, and future improvements is documented in [`AI_DEVELOPMENT_NOTES.md`](AI_DEVELOPMENT_NOTES.md).
+
+---
+
+## 10. Known Limitations and Future Improvements
+
+- Natural-language interpretation is limited to supported analytical intents.
+- Complex multi-dimensional queries are not yet supported.
+- The application uses SQLite and is designed as a lightweight assessment project.
+- SQL validation uses lexical checks and predefined query execution; it is not a complete SQL parser or production-grade security boundary.
+- Conversational multi-turn memory is not implemented.
+
+Potential improvements:
+
+1. Add conversational multi-turn question handling.
+2. Support dynamic multi-dimensional business analytics.
+3. Improve CSV schema detection and mapping.
+4. Add more interactive visual drill-downs.
+5. Strengthen database security with read-only connections.
+6. Improve deployment, logging, and monitoring.
+
+---
+
+## Project Summary
+
+The RSG Mini AI Business Intelligence Assistant demonstrates how natural-language AI interpretation can be combined with deterministic database analytics to provide accurate, explainable, and auditable business intelligence.
+
+**Core principle: AI understands the question; SQL calculates the answer.**
