@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RSG Mini AI BI Assistant - Complete Project & Interview Study Guide</title>
+<style>
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #1a202c;
+    line-height: 1.6;
+    margin: 40px;
+    font-size: 13px;
+  }
+  h1 { color: #1e3a8a; font-size: 24px; border-bottom: 2px solid #3b82f6; padding-bottom: 8px; margin-bottom: 4px; }
+  h2 { color: #1e40af; font-size: 17px; margin-top: 24px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+  h3 { color: #0f172a; font-size: 14px; margin-top: 14px; }
+  .badge { background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+  .highlight { background: #f0fdf4; border-left: 4px solid #16a34a; padding: 10px 14px; margin: 12px 0; }
+  .warning { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 10px 14px; margin: 12px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; }
+  th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; }
+  th { background: #f1f5f9; color: #0f172a; }
+  pre { background: #0f172a; color: #f8fafc; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 11px; overflow-x: auto; }
+  code { font-family: monospace; background: #f1f5f9; padding: 2px 4px; border-radius: 3px; font-size: 11.5px; }
+  .qa { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 12px; }
+  .qa-q { font-weight: bold; color: #1e3a8a; margin-bottom: 6px; font-size: 13px; }
+  .qa-a { color: #334155; }
+</style>
+</head>
+<body>
+
+<h1>RSG Mini AI Business Intelligence Assistant</h1>
+<p><strong>Complete Project Architecture, Engineering Workflow & Interview Preparation Guide</strong></p>
+<p><span class="badge">GET Selection Technical Assessment</span> &nbsp; <span class="badge">Vectorless RAG Architecture</span> &nbsp; <span class="badge">24/24 Automated Tests Passed</span></p>
+
+<h2>1. Project Overview & Objective</h2>
+<p>
+  <strong>Goal:</strong> Build an application that allows business users to ask natural language questions about sales transactions and receive verified, deterministic answers backed by real database queries.
+</p>
+<div class="highlight">
+  <strong>The Key Architectural Principle:</strong> In financial and business intelligence data, <em>LLMs must never invent or guess numbers</em>. We use AI strictly to <strong>classify user intent</strong> and <strong>extract parameters</strong>, while executing <strong>allowlisted, parameterized, deterministic SQLite queries</strong> to calculate exact results.
+</div>
+
+<h2>2. Full Technology Stack</h2>
+<ul>
+  <li><strong>Backend Gateway:</strong> <code>FastAPI</code> (Python 3.10+) — ASGI framework with Pydantic schema validation.</li>
+  <li><strong>Database Engine:</strong> <code>SQLite3</code> — ACID-compliant relational database with B-tree indexes on order dates, products, and regions.</li>
+  <li><strong>AI / Interpretation Layer:</strong> Dual-Engine — supports zero-shot LLM classification (Groq/OpenAI/Ollama) and a deterministic regex word-boundary fallback requiring 0 external API keys.</li>
+  <li><strong>Frontend UI:</strong> HTML5, modern CSS3, and <code>Chart.js</code> for interactive visual dashboards.</li>
+  <li><strong>Automated Testing:</strong> <code>Pytest</code> with 24 automated unit and integration tests.</li>
+</ul>
+
+<h2>3. Data Lineage & Cleansing Policy (51 Total Rows)</h2>
+<p>
+  The source CSV (<code>data/sales_data.csv</code>) contains 51 transactions. Rather than silently deleting invalid rows, all 51 rows are imported into SQLite, tagging rows with <code>is_eligible</code> (1 or 0) and an explicit <code>validation_note</code>:
+</p>
+<ul>
+  <li><strong>48 Eligible Transactions:</strong> Completed sales with positive quantities and valid prices.</li>
+  <li><strong>3 Excluded Transactions:</strong>
+    <ul>
+      <li><code>TXN0033</code>: Status is <strong>Returned</strong> &rarr; Excluded from net revenue.</li>
+      <li><code>TXN0034</code>: Quantity is <strong>0</strong> &rarr; Invalid transaction.</li>
+      <li><code>TXN0051</code>: Unit Price is <strong>Missing/NULL</strong> &rarr; Incomplete record.</li>
+    </ul>
+  </li>
+  <li><strong>Net Revenue Formula:</strong> <code>Net Revenue = (Quantity × Unit Price) - Discount Amount</code></li>
+</ul>
+
+<h2>4. Core Assessment Questions & Converted SQL Statements</h2>
+<table>
+  <tr>
+    <th>Question</th>
+    <th>Intent</th>
+    <th>Exact Executed SQL Query</th>
+    <th>Verified Result</th>
+  </tr>
+  <tr>
+    <td><strong>1. Total revenue?</strong></td>
+    <td><code>total_revenue</code></td>
+    <td><code>SELECT ROUND(COALESCE(SUM(revenue), 0), 2) AS total_revenue, COUNT(*) AS transactions FROM sales_transactions WHERE is_eligible = 1;</code></td>
+    <td>₹1,439,200.00 (48 txns)</td>
+  </tr>
+  <tr>
+    <td><strong>2. Highest revenue product?</strong></td>
+    <td><code>top_product</code></td>
+    <td><code>SELECT product, ROUND(SUM(revenue), 2) AS revenue, SUM(quantity) AS units_sold, COUNT(*) AS transactions FROM sales_transactions WHERE is_eligible = 1 GROUP BY product ORDER BY revenue DESC, product ASC LIMIT 1;</code></td>
+    <td>Monitor (₹473,000.00, 50 units sold)</td>
+  </tr>
+  <tr>
+    <td><strong>3. Monthly revenue trend?</strong></td>
+    <td><code>monthly_trend</code></td>
+    <td><code>SELECT strftime('%Y-%m', order_date) AS month, ROUND(SUM(revenue), 2) AS revenue, COUNT(*) AS transactions FROM sales_transactions WHERE is_eligible = 1 GROUP BY month ORDER BY month;</code></td>
+    <td>6 months (Jan: ₹210.2k, Feb: ₹234.6k, Mar: ₹223.9k, Apr: ₹240.7k, May: ₹318.5k, Jun: ₹211.2k)</td>
+  </tr>
+  <tr>
+    <td><strong>4. Highest sales region?</strong></td>
+    <td><code>top_region</code></td>
+    <td><code>SELECT region, ROUND(SUM(revenue), 2) AS revenue, COUNT(*) AS transactions FROM sales_transactions WHERE is_eligible = 1 GROUP BY region ORDER BY revenue DESC, region ASC LIMIT 1;</code></td>
+    <td>South (₹411,200.00 across 13 txns)</td>
+  </tr>
+  <tr>
+    <td><strong>5. Revenue change between two months?</strong></td>
+    <td><code>compare_months</code></td>
+    <td><code>SELECT strftime('%Y-%m', order_date) AS month, ROUND(SUM(revenue), 2) AS revenue, COUNT(*) AS transactions FROM sales_transactions WHERE is_eligible = 1 AND strftime('%Y-%m', order_date) IN ('2026-01', '2026-02') GROUP BY month ORDER BY month;</code></td>
+    <td>Increased by ₹24,350.00 (+11.58%) from Jan to Feb 2026</td>
+  </tr>
+</table>
+
+<h2>5. AI Interview Topics Deep-Dive</h2>
+
+<h3>A. Generative AI vs. Agentic AI</h3>
+<ul>
+  <li><strong>Generative AI:</strong> Single-turn, reactive prompt-to-response generation. Cannot use tools or execute SQL. Predicts next tokens probabilistically, which causes math hallucinations.</li>
+  <li><strong>Agentic AI:</strong> Multi-step, goal-directed autonomous execution with tool-calling loops. The agent evaluates what is needed, invokes tools (e.g. SQLite database queries), validates the outputs, and presents verified figures.</li>
+  <li><strong>Andrew Ng's 4 Agentic Patterns:</strong>
+    <ol>
+      <li><strong>Tool Use:</strong> Connecting LLMs to deterministic execution tools (our SQLite queries).</li>
+      <li><strong>Planning:</strong> Breaking complex instructions into sub-steps.</li>
+      <li><strong>Reflection:</strong> Self-checking outputs before presentation.</li>
+      <li><strong>Multi-Agent Collaboration:</strong> Specialized agents cooperating on a task.</li>
+    </ol>
+  </li>
+</ul>
+
+<h3>B. RAG vs. Vectorless RAG</h3>
+<div class="warning">
+  <strong>Why Traditional Vector RAG Fails for BI:</strong><br>
+  Vector RAG splits text into chunks, generates vector embeddings, and performs cosine similarity search. When asked <em>"What is total revenue?"</em>, Vector RAG retrieves only top-5 arbitrary text chunks. The LLM then sums those 5 chunks and hallucinates an incomplete answer.
+</div>
+<p>
+  <strong>Vectorless RAG (Our Approach):</strong> Queries structured relational databases directly using schema-grounded, allowlisted SQL. It aggregates 100% of rows deterministically with zero math hallucination and millisecond response time.
+</p>
+
+<h3>C. Agentic Frameworks (LangChain, Google ADK, Dify)</h3>
+<ul>
+  <li><strong>LangChain / LangGraph:</strong> Implements state machine graphs. Our assistant maps to a <code>StateGraph</code> with a Router Node, a Database Tool Node, and a Formatter Node.</li>
+  <li><strong>Google ADK (Agent Development Kit):</strong> Leverages native Gemini function calling (<code>tools=[total_revenue, compare_months]</code>) with OpenAPI typed schemas.</li>
+  <li><strong>Dify:</strong> Visual LLMOps platform where our FastAPI endpoints can be imported as a Custom Tool Provider in a drag-and-drop workflow DAG.</li>
+</ul>
+
+<h2>6. Security Guardrails & SQL Injection Prevention</h2>
+<ol>
+  <li><strong>No Dynamic SQL Generation:</strong> User input is never concatenated into SQL strings.</li>
+  <li><strong>AST Query Validator (<code>validate_sql_query</code>):</strong> Restricts queries to single-statement read-only <code>SELECT</code> and <code>WITH</code> operations. Blocks <code>DROP</code>, <code>DELETE</code>, <code>UPDATE</code>, <code>INSERT</code>, <code>ALTER</code>, and multi-statement execution.</li>
+  <li><strong>Parameterized Queries:</strong> Uses <code>?</code> parameter binding for safe variable interpolation.</li>
+</ol>
+
+<h2>7. How to Run the Application</h2>
+<h3>Command Line Interface (CLI):</h3>
+<pre>python ask.py "What is the total revenue?"</pre>
+
+<h3>Web Dashboard:</h3>
+<pre>
+source .venv/bin/activate
+python -m uvicorn app.main:app --reload
+# Open browser at: http://localhost:8000
+</pre>
+
+<h3>Automated Tests:</h3>
+<pre>pytest -v</pre>
+
+<h2>8. Top Interview Questions & Model Answers</h2>
+
+<div class="qa">
+  <div class="qa-q">Q1: Why didn't you let the LLM generate arbitrary SQL directly?</div>
+  <div class="qa-a">
+    "Allowing unconstrained Text-to-SQL introduces severe security vulnerabilities (prompt injection and destructive SQL) and non-deterministic hallucinations (miscalculating filters, missing returned items, or inventing tables). Using Vectorless RAG allows AI to classify intent and extract parameters safely, while deterministic, allowlisted SQL guarantees 100% arithmetic correctness."
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q">Q2: How did you handle bad or missing rows in the CSV? Did you delete them?</div>
+  <div class="qa-a">
+    "Deleting bad rows during ETL destroys data lineage and prevents audit reconciliation. Instead, we preserved all 51 rows in SQLite, adding an <code>is_eligible</code> flag and <code>validation_note</code>. Only 48 valid rows enter revenue calculations. The 3 excluded rows (TXN0033: Returned, TXN0034: Qty 0, TXN0051: Missing Price) remain stored and can be inspected via our audit API."
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q">Q3: How would you scale this application to 50 million transactions?</div>
+  <div class="qa-a">
+    "In an enterprise production setting, I would:
+    1. Migrate from SQLite to a columnar analytics warehouse like DuckDB or ClickHouse.
+    2. Create materialized rollup views to pre-aggregate daily and monthly revenue.
+    3. Add a Redis caching layer for common KPI queries with TTL invalidation.
+    4. Implement dynamic schema tool-calling using LangGraph or Google ADK."
+  </div>
+</div>
+
+<div class="qa">
+  <div class="qa-q">Q4: What real problems did you encounter during development and how did you debug them?</div>
+  <div class="qa-a">
+    "When asking the assessment's verbatim Question 5 ('How did revenue change between two months?'), no month names were specified, so the parser fell through to total revenue. I debugged this by adding a comparison fallback that defaults to comparing the first two recorded months with a note. Additionally, naive keyword matching on SQL injection input like <code>DROP TABLE sales_transactions;</code> matched 'sales'. I resolved this using regex word boundaries <code>\b</code> and an upfront DDL blocklist."
+  </div>
+</div>
+
+</body>
+</html>
