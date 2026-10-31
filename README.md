@@ -16,7 +16,22 @@ Built with **FastAPI + SQLite + HTML5 / CSS3 / JavaScript (Chart.js)**.
 6. **Technical Interview Preparation Guide:** See [`docs/interview_preparation_guide.md`](docs/interview_preparation_guide.md).
 
 ---
+## 🎥 Project Demonstration
 
+Watch the complete demonstration of the RSG Mini AI Business Intelligence Assistant.
+
+**[▶ Watch Project Demo Video](https://drive.google.com/file/d/1JoB4mHv5MB3WKazAv7YNb81vujNnyj8D/view?usp=drive_link)**
+
+The demonstration covers:
+
+- Application dashboard and interface.
+- Natural-language business questions.
+- AI-powered question interpretation.
+- Database-backed analytics and verified results.
+- Monthly trends and revenue comparisons.
+- API documentation and application workflow.
+
+*Note: Open the video using the link above. Google Drive access is set to anyone with the link (Viewer).*
 ## Key Features
 
 ### 1. Transparent Data Ingestion and Audit
